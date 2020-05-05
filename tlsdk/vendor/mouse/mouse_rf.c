@@ -189,8 +189,8 @@ static inline void mouse_rf_prepare(mouse_status_t *mouse_status)
         }
     }
 #endif
-    extern u8 dbg_sensor_cpi;
-    pkt_km.flow = (mouse_status->loop_cnt & 1) ? (cpu_working_tick >> 8) : ((mouse_status->mouse_sensor & 0x0f) << 4) | dbg_sensor_cpi;
+
+    pkt_km.flow = (mouse_status->loop_cnt & 1);
 }
 
 //extern u32 cpu_working_tick;
