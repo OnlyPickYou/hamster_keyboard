@@ -4,7 +4,7 @@
 #include "../../proj_lib/pm.h"
 #include "../common/rf_frame.h"
 #include "device_info.h"
-#include "mouse.h"
+#include "kb.h"
 
 #define			PM_REG_START		0x19
 #define			PM_REG_END			0x1f
@@ -21,9 +21,9 @@ static device_info_t device_info;
  *  or Load from OTP
  *
  */
-void device_info_load(mouse_status_t *mouse_status)
+void device_info_load(kb_status_t *kb_status)
 {
-#if DEVICE_INFO_STORE
+#if (DEVICE_INFO_STORE & 0)
     u8 * pd = (u8 *) &device_info;
     int i;
     for (i=PM_REG_START; i<=PM_REG_END; i++) {
@@ -39,17 +39,17 @@ void device_info_load(mouse_status_t *mouse_status)
     device_info.poweron = ((device_info.mode^0x80) + 2) | 1;
     analog_write (PM_REG_END, device_info.poweron);
 #endif
-    mouse_status->mouse_mode = device_info.mode ? STATE_NORMAL : STATE_POWERON;
+    kb_status->kb_mode = device_info.mode ? STATE_NORMAL : STATE_POWERON;
 
 //   Need get poweron, cpi, etc back first
-    if ( mouse_status->mouse_mode != STATE_POWERON ){
-    	mouse_status->cpi = device_info.sensor & INFO_SENSOR_CPI_CTRL;
-        mouse_status->mouse_sensor = device_info.sensor & INFO_SENSOR_STATUS_CTRL;
-    	mouse_status->dongle_id = device_info.dongle_id;
-        rf_set_access_code1 (mouse_status->dongle_id);
+    if ( kb_status->mouse_mode != STATE_POWERON ){
+    	kb_status->cpi = device_info.sensor & INFO_SENSOR_CPI_CTRL;
+        kb_status->mouse_sensor = device_info.sensor & INFO_SENSOR_STATUS_CTRL;
+    	kb_status->dongle_id = device_info.dongle_id;
+        rf_set_access_code1 (kb_status->dongle_id);
         }
 #else
-    mouse_status->mouse_mode = device_info.mode ? STATE_NORMAL : STATE_POWERON;
+    kb_status->kb_mode = device_info.mode ? STATE_NORMAL : STATE_POWERON;
 #endif
 }
 
@@ -58,8 +58,9 @@ void device_info_load(mouse_status_t *mouse_status)
  * Save the information need from the deep sleep back
  *
  */
-void device_info_save(mouse_status_t *mouse_status, u32 sleep_save)
+void device_info_save(kb_status_t *kb_status, u32 sleep_save)
 {
+#if 0
     u8 * pd = (u8 *) &device_info;
     int i;
     //if watchdog trigger, this flag will increase by 2
@@ -70,10 +71,11 @@ void device_info_save(mouse_status_t *mouse_status, u32 sleep_save)
         device_info.mode = device_info.poweron - 2;
 #endif
     device_info.dongle_id = rf_get_access_code1();
-    device_info.sensor = (mouse_status->mouse_sensor & INFO_SENSOR_STATUS_CTRL) | (mouse_status->cpi & INFO_SENSOR_CPI_CTRL) ;
+    device_info.sensor = (kb_status->mouse_sensor & INFO_SENSOR_STATUS_CTRL) | (kb_status->cpi & INFO_SENSOR_CPI_CTRL) ;
     for (i=PM_REG_START; i<=PM_REG_END; i++) {
         analog_write (i, *pd ++);
     }
+#endif
 }
 #endif
 

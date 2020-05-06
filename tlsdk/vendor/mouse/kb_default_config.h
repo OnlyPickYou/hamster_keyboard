@@ -18,7 +18,7 @@ extern "C" {
 #define STRING_PRODUCT			L"2.4G Wireless Audio"
 #define STRING_SERIAL			L"TLSR8266"
 
-#if		__PROJECT_MOUSE_8366__
+#if		__PROJECT_KEYBOARD_8366__
 #define CHIP_TYPE				CHIP_TYPE_8366
 #else
 #define CHIP_TYPE				CHIP_TYPE_8266
@@ -91,6 +91,38 @@ extern "C" {
 ///////////////////  GPIO  /////////////////////////////////
 //  only need to define those are not default
 //  all gpios are default to be output disabled, input disabled, output to 0, output strength to 1
+
+
+typedef struct {
+	u8  kb_mode;
+	u8  mode_link;
+	u8  rf_sending;
+	u8  kb_pipe_rssi;
+
+	u8  tx_power;
+	u8  cust_tx_power;
+	u8  tx_retry;
+    u8  host_keyboard_status;
+
+    u16 no_ack;
+    u8 pre_host_status;
+    u8 flag;
+
+	u16 led_gpio_lvd;
+	u16 led_gpio_scr;
+	u16 led_gpio_cap;
+	u16 led_gpio_num;
+
+	u8  led_level_lvd;
+	u8  led_level_scr;
+	u8  led_level_cap;
+	u8  led_level_num;
+
+	u32 dongle_id;
+    u32 loop_cnt;
+} kb_status_t;
+
+#define KB_MAIN_LOOP_TIME_MS    12
 
 #define	DM_FUNC					AS_GPIO  //DM as LED
 #define	DP_FUNC					AS_GPIO  //DM and DP should be defined together

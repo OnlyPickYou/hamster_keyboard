@@ -3,8 +3,9 @@
 #if (__PROJECT_PM_TEST_5330__)	//  min environment for testing PM functionality.
 	#define __PROJECT_PM_TEST__ 			1
 	#include "example_8566.h"
-#elif (__PROJECT_MOUSE__)
-    #include "../mouse/mouse.h"
+#elif (__PROJECT_KEYBOARD_8366__)
+    #include "../mouse/kb.h"
+	#include "../mouse/kb_default_config.h"
 #elif (__PROJECT_MOUSE_8510__)
     #include "../mouse_cavy/cavym.h"
 #elif (__PROJECT_DONGLE_8510__)

@@ -11,10 +11,10 @@
 #include "../common/rf_frame.h"
 #include "../common/emi.h"
 
-#include "mouse_custom.h"
-#include "mouse_rf.h"
+#include "kb_custom.h"
+#include "kb_rf.h"
 #include "kb_led.h"
-#include "mouse_emi.h"
+#include "kb_emi.h"
 
 extern kb_data_t	kb_event;
 
@@ -104,5 +104,5 @@ void kb_emi_process(void)
     }
     kb_device_led_setup( kb_led_emi_cfg[kb_emi_data.test_mode_sel] );
     kb_device_led_process();
-	emi_process( cmd , kb_emi_data.test_chn_idx, kb_emi_data.test_mode_sel, (u8 *)&pkt_km, mouse_cust_tx_power_emi );
+	emi_process( cmd , kb_emi_data.test_chn_idx, kb_emi_data.test_mode_sel, (u8 *)&pkt_km, kb_cust_tx_power_emi );
 }

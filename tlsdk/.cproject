@@ -1183,9 +1183,7 @@
 								<option id="com.telink.tc32eclipse.compiler.option.optimize.packstruct.557482400" name="Pack structs (-fpack-struct)" superClass="com.telink.tc32eclipse.compiler.option.optimize.packstruct" value="true" valueType="boolean"/>
 								<option id="com.telink.tc32eclipse.compiler.option.optimize.shortenums.67005369" name="Short enums (-fshort-enums)" superClass="com.telink.tc32eclipse.compiler.option.optimize.shortenums" value="true" valueType="boolean"/>
 								<option id="com.telink.tc32eclipse.compiler.option.def.2036819326" name="Define Syms (-D)" superClass="com.telink.tc32eclipse.compiler.option.def" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="__PROJECT_MOUSE__=1"/>
-									<listOptionValue builtIn="false" value="__PROJECT_KEYBOARD__=1"/>
-									<listOptionValue builtIn="false" value="__PROJECT_MOUSE_8366__=1"/>
+									<listOptionValue builtIn="false" value="__PROJECT_KEYBOARD_8366__=1"/>
 								</option>
 								<inputType id="com.telink.tc32eclipse.compiler.TC32Win.input.1795658091" name="C Source Files" superClass="com.telink.tc32eclipse.compiler.TC32Win.input"/>
 							</tool>

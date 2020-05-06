@@ -590,7 +590,7 @@ _attribute_ram_code_ void irq_device_rx(void)
 		extern int  rf_rx_process(u8 *);
 		if (rf_rx_process (raw_pkt) && ll_chn_tick != p->tick) {
 			ll_chn_tick = p->tick;			//sync time
-#if(__PROJECT_KEYBOARD__ ||__PROJECT_8368_KEYBOARD_MJ__|| __PROJECT_REMINGTON_KEYBOARD__ || __PROJECT_KEYBOARD_ENC_8368__ || __PROJECT_REMINGTON_KEYBOARD_TW__)
+#if(__PROJECT_KEYBOARD__ || __PROJECT_REMINGTON_KEYBOARD__ || __PROJECT_KEYBOARD_8366__)
 #else
 			device_sync = 1;
 #endif

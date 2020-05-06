@@ -190,7 +190,7 @@ void cpu_set_gpio_wakeup (int pin, int pol, int en) {
 u32 tick_32k_bk;
 int tick_1ms_adjust;
 
-#if(__PROJECT_MOUSE__ || __PROJECT_KEYBOARD__)
+#if(__PROJECT_MOUSE__ || __PROJECT_KEYBOARD__ || _PROJECT_KEYBOARD_REMINGTON__)
 _attribute_ram_code_ void cpu_adjust_system_tick (int adjust_ms)
 #else
 void cpu_adjust_system_tick (int adjust_ms)

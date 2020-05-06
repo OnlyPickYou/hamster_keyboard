@@ -30,7 +30,7 @@ kb_lock_status_t kb_lock_status = {
 void kb_platform_init(void);
 extern  void kb_keyScan_init(void);
 
-kb_status_t  kb_status;
+  kb_status;
 
 extern kb_data_t	kb_event;
 

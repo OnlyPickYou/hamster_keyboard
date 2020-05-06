@@ -13,34 +13,24 @@
 #include "kb_custom.h"
 #include "kb_led.h"
 #include "kb_rf.h"
-#include "kb_pm.h"
+#include "kb.h"
+//#include "kb_pm.h"
+
+extern  kb_status_t kb_status;
+
+#define HOST_NO_LINK        (kb_status.no_ack >= 400)
+#define HOST_LINK_LOST		(kb_status.no_ack >= 300)
 
 
-#define		CHANNEL_SLOT_TIME				8000
-
-#define		LL_CHANNEL_SEARCH_TH			60
-#define		LL_CHANNEL_SEARCH_FLAG			BIT(16)
-#define		LL_NEXT_CHANNEL(c)				((c + 6) & 14)
-
-#define     PKT_BUFF_SIZE   				48
-
-u8  	rf_rx_buff[PKT_BUFF_SIZE*2] __attribute__((aligned(4)));
-int		rf_rx_wptr;
-
-u8		device_channel;
-u16		ll_chn_tick;
-
-u32		ll_chn_mask = LL_CHANNEL_SEARCH_FLAG;
-u32		ll_clock_time;
 u32		tick_last_tx;
-int		device_packet_received;
+
 int		km_dat_sending = 0;
 
 
 #if(!KEYBOARD_PIPE1_DATA_WITH_DID)
 u8 pipe1_send_id_flg = 0;
 #endif
-volatile int		device_ack_received = 0;
+
 
 
 u8* kb_rf_pkt = (u8*)&pkt_pairing;
@@ -103,107 +93,9 @@ int kb_pairing_mode_detect(void)
 
 
 
-_attribute_ram_code_ u8	get_next_channel_with_mask(u32 mask, u8 chn)
-{
-	int chn_high = (mask >> 4) & 0x0f;
-
-	if (mask & LL_CHANNEL_SEARCH_FLAG) {
-		return LL_NEXT_CHANNEL (chn);
-	}
-	else if (chn_high != chn) {
-		return chn_high;
-	}
-	else {
-		return mask & 0x0f;
-	}
-}
-
-
-/////////////////////////////////////////////////////////////////////////
-// device side
-/////////////////////////////////////////////////////////////////////////
-void ll_device_init (void)
-{
-	reg_dma_rf_rx_addr = (u16)(u32) (rf_rx_buff);
-	reg_dma2_ctrl = FLD_DMA_WR_MEM | (PKT_BUFF_SIZE>>4);   // rf rx buffer enable & size
-	reg_dma_chn_irq_msk = 0;
-	reg_irq_mask |= FLD_IRQ_ZB_RT_EN;    //enable RF & timer1 interrupt
-	reg_rf_irq_mask = FLD_RF_IRQ_RX | FLD_RF_IRQ_TX;
-}
-
-
-
-_attribute_ram_code_ void irq_device_rx(void)
-{
-	u8 * raw_pkt = (u8 *) (rf_rx_buff + rf_rx_wptr * PKT_BUFF_SIZE);
-	rf_rx_wptr = (rf_rx_wptr + 1) & 1;
-	reg_dma_rf_rx_addr = (u16)(u32) (rf_rx_buff + rf_rx_wptr * PKT_BUFF_SIZE); //set next buffer
-
-	reg_rf_irq_status = FLD_RF_IRQ_RX;
-
-	if	(	raw_pkt[0] >= 15 &&
-			RF_PACKET_LENGTH_OK(raw_pkt) &&
-			RF_PACKET_CRC_OK(raw_pkt) )	{
-		rf_packet_ack_pairing_t *p = (rf_packet_ack_pairing_t *)(raw_pkt + 8);
-        rf_power_enable (0);
-		extern int  rf_rx_process(u8 *);
-		if (rf_rx_process (raw_pkt) && ll_chn_tick != p->tick) {
-			ll_chn_tick = p->tick;			//sync time
-			device_ack_received = 1;
-			ll_chn_mask = p->chn;			//update channel
-		}
-		rf_set_channel (device_channel, RF_CHN_TABLE);
-		raw_pkt[0] = 1;
-	}
-}
 
 
 extern rf_packet_pairing_t	pkt_pairing;
-task_when_rf_func p_task_when_rf = NULL;
-
-_attribute_ram_code_ int	device_send_packet (u8 * p, u32 timeout, int retry, int pairing_link)
-{
-    while ( !clock_time_exceed (kb_sleep.wakeup_tick, 500) );    //delay to get stable pll clock
-	rf_power_enable (1);
-
-	static	u32 ack_miss_no;
-	device_ack_received = 0;
-	int i;
-
-	for (i=0; i<=retry; i += 1) {
-		rf_set_channel (device_channel, RF_CHN_TABLE);
-		u32 t = clock_time ();
-		rf_send_packet (p, 300, 0);
-		reg_rf_irq_status = 0xffff;
-        /*if ( DO_TASK_WHEN_RF_EN && p_task_when_rf != NULL) {
-           (*p_task_when_rf) ();
-           p_task_when_rf = NULL;
-        }*/
-		while (	!device_ack_received &&
-				!clock_time_exceed (t, timeout) &&
-				!(reg_rf_irq_status & (FLD_RF_IRX_RETRY_HIT | FLD_RF_IRX_CMD_DONE)) );
-
-		if (device_ack_received) {
-			ack_miss_no = 0;
-			break;
-		}
-		ack_miss_no ++;
-		if (ack_miss_no >= LL_CHANNEL_SEARCH_TH) {
-			ll_chn_mask = LL_CHANNEL_SEARCH_FLAG;
-		}
-
-		device_channel = get_next_channel_with_mask (ll_chn_mask, device_channel);
-	}
-
-	rf_power_enable (0);
-
-	if (i <= retry) {
-		return 1;
-	}
-	else{
-		return 0;
-	}
-}
 
 
 
@@ -273,55 +165,6 @@ void kb_paring_and_syncing_proc(void)
 	}
 }
 
-_attribute_ram_code_ int  rf_rx_process(u8 * p)
-{
-	rf_packet_ack_pairing_t *p_pkt = (rf_packet_ack_pairing_t *) (p + 8);
-	if (p_pkt->proto == RF_PROTO_BYTE) {
-		pkt_pairing.rssi = p[4];
-		///////////////  Paring/Link ACK //////////////////////////
-		if ( p_pkt->type == FRAME_TYPE_ACK && (p_pkt->did == pkt_pairing.did) ) {	//paring/link request
-			//change to pip2 STATE_NORMAL
-			rf_set_access_code1 (p_pkt->gid1);//need change to pipe2 that is for kb's data
-			kb_status.mode_link = LINK_WITH_DONGLE_OK;
-			return 1;
-		}
-		////////// end of PIPE1 /////////////////////////////////////
-		///////////// PIPE1: ACK /////////////////////////////
-		else if (p_pkt->type == FRAME_TYPE_ACK_KEYBOARD) {
-			kb_status.kb_pipe_rssi = p[4];
-			kb_status.host_keyboard_status =((rf_packet_ack_keyboard_t*)p_pkt)->status;
-
-			//BIT(2):SCR  BIT(1):CAP  BIT(0):NUM
-			if(kb_status.host_keyboard_status != kb_status.pre_host_status){
-				if(kb_status.led_gpio_scr){
-					gpio_write(kb_status.led_gpio_scr,((kb_status.host_keyboard_status>>2)&0x01)^kb_status.led_level_scr);
-				}
-				if(kb_status.led_gpio_cap){
-					gpio_write(kb_status.led_gpio_cap,((kb_status.host_keyboard_status>>1)&0x01)^kb_status.led_level_scr);
-				}
-				if(kb_status.led_gpio_num){
-					gpio_write(kb_status.led_gpio_num,(kb_status.host_keyboard_status&0x01)^kb_status.led_level_scr);
-				}
-				kb_status.pre_host_status = kb_status.host_keyboard_status;
-			}
-
-#if(!KEYBOARD_PIPE1_DATA_WITH_DID)
-			pipe1_send_id_flg = 0;
-#endif
-
-			return 1;
-		}
-#if(!KEYBOARD_PIPE1_DATA_WITH_DID)
-		else if(p_pkt->type == FRAME_AUTO_ACK_KB_ASK_ID){
-			pipe1_send_id_flg = 1;//fix auto bug
-			return 1;
-		}
-#endif
-		////////// end of PIPE1 /////////////////////////////////////
-	}
-
-	return 0;
-}
 
 ////////////////////////////////////////////////////////////////////////
 //	keyboard/mouse data management
@@ -456,3 +299,38 @@ void kb_rf_proc( u32 key_scaned )
 	}
 }
 
+u8	mode_link = 0;
+_attribute_ram_code_ int  rf_rx_process(u8 * p)
+{
+	rf_packet_ack_pairing_t *p_pkt = (rf_packet_ack_pairing_t *) (p + 8);
+	static u8 rf_rx_mouse;
+	if (p_pkt->proto == RF_PROTO_BYTE) {
+		pkt_pairing.rssi = p[4];
+		pkt_km.rssi = p[4];
+        //pkt_km.per ^= 0x80;
+		///////////////  Paring/Link ACK //////////////////////////
+		if (p_pkt->type == FRAME_TYPE_ACK && (p_pkt->did == pkt_pairing.did) ) {	//paring/link request
+            rf_set_access_code1 (p_pkt->gid1);          //access_code1 = p_pkt->gid1;
+			mode_link = 1;
+			return 1;
+		}
+		////////// end of PIPE1 /////////////////////////////////////
+		///////////// PIPE1: ACK /////////////////////////////
+		else if (p_pkt->type == FRAME_TYPE_ACK_MOUSE) {
+			rf_rx_mouse++;
+#if(!MOUSE_PIPE1_DATA_WITH_DID)
+			pipe1_send_id_flg = 0;
+#endif
+			return 1;
+		}
+#if(!MOUSE_PIPE1_DATA_WITH_DID)
+		else if(p_pkt->type == FRAME_AUTO_ACK_MOUSE_ASK_ID){ //fix auto bug
+			pipe1_send_id_flg = 1;
+			return 1;
+		}
+#endif
+
+		////////// end of PIPE1 /////////////////////////////////////
+	}
+	return 0;
+}

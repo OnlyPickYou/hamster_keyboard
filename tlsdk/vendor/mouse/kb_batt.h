@@ -5,8 +5,8 @@
  *      Author: xuzhen
  */
 
-#ifndef MOUSE_BATT_H_
-#define MOUSE_BATT_H_
+#ifndef KB_BATT_H_
+#define KB_BATT_H_
 
 
 #ifndef MOSUE_BATTERY_LOW_DETECT
@@ -24,7 +24,7 @@
 #define mouse_batt_detect_time  ( 1 + mouse_batt_low_alarm_cnt )
 
 #if MOSUE_BATTERY_LOW_DETECT
-void mouse_batt_det_process( mouse_status_t *mouse_status );
+void kb_batt_det_process( kb_status_t *kb_status );
 #else
 static inline void mouse_batt_det_process( mouse_status_t *mouse_status ){}
 #endif

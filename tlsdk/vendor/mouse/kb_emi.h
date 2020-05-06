@@ -5,8 +5,8 @@
  *      Author: Administrator
  */
 
-#ifndef MOUSE_EMI_H_
-#define MOUSE_EMI_H_
+#ifndef KB_EMI_H_
+#define KB_EMI_H_
 
 typedef struct{
 	u8  emi_start;
