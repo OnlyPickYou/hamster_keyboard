@@ -12,7 +12,7 @@
 //#include "../../vendor/common/custom.h"
 
 #if (__PROJECT_KEYBOARD__||__PROJECT_KEYBOARD_8366__ || __PROJECT_REMINGTON_KEYBOARD__ )
-extern  kb_status;
+extern  kb_status_t kb_status;
 #endif
 
 

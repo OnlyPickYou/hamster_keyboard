@@ -87,6 +87,21 @@ static inline u32 gpio_read(u32 pin){
 	return  ( (*((volatile u32*)0x800580)) & pin );
 }
 
+static inline u32 gpio_read_cache(u32 pin, u8 *p)
+{
+    u8 num = 0;
+    num = (pin & 0xff) ? 0 : 1;    //0 or 1
+    return ( p[num] & (pin >> (num * 8)) );
+}
+
+
+static inline void gpio_read_all(u8 *p)
+{
+    p[0] = REG_ADDR8(0x580);
+    p[1] = REG_ADDR8(0x581);
+}
+
+
 void gpio_write_in_ram(u32 pin, u32 value);
 
 #else
