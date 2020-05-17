@@ -8,7 +8,7 @@
 #include "../../proj/drivers/keyboard.h"
 #include "../link_layer/rf_ll.h"
 
-#include "device_info.h"
+#include "kb_info.h"
 #include "kb.h"
 #include "kb_batt.h"
 #include "kb_rf.h"
@@ -17,21 +17,12 @@
 #include "trace.h"
 
 
-#ifndef MOUSE_GOLDEN_VPATTERN
-#define MOUSE_GOLDEN_VPATTERN   0
-#endif
-
-#ifndef MOUSE_NO_HW_SIM
-#define MOUSE_NO_HW_SIM         (MOUSE_GOLDEN_VPATTERN || MOUSE_EMI_4_FCC || 0)
-#endif
-
-#define	MOUSE_V_PATERN_MODE	    (MOUSE_NO_HW_SIM || 0)
 #define led_cnt_rate    8
 
-kb_status_t      kb_status;
-
+kb_status_t kb_status;
+u32 key_scaned;
 extern kb_data_t	kb_event;
-
+extern int kb_is_lock_pressed;
 void kb_sleep_wakeup_init(){
 #ifdef reg_gpio_wakeup_en    
 	reg_gpio_wakeup_en |= FLD_GPIO_WAKEUP_EN;	//gpio wakeup initial
@@ -40,69 +31,60 @@ void kb_sleep_wakeup_init(){
 
 }
 
-//button_init,Wheel init, Titl wheel init, Sensor init, led_init
-void platform_init( kb_status_t  *kb_status )
-{
 
+kb_status_t* kb_proc_get_kb_status(void)
+{
+    return &kb_status;
+}
+
+
+void kb_platform_init( kb_status_t  *kb_status )
+{
+	kb_device_led_init(kb_status->led_gpio_lvd, kb_status->led_level_lvd, 5);
+
+#if 0
+	//Note:gpio_num defined as SWS, not enbale now
+	if(kb_status.led_gpio_num){
+		gpio_set_input_en( kb_status.led_gpio_num, 0 );
+	    gpio_set_output_en( kb_status.led_gpio_num, 1 );
+	    gpio_write(kb_status.led_gpio_num,0^kb_status.led_level_num);
+	}
+#endif
+
+	//emi paring±ØÐëÔÚSTATE_POWERON?
+	if(kb_status->kb_mode == STATE_POWERON){
+		if( (kb_event.keycode[0] == VK_MINUS) && (kb_event.cnt == 1)){
+			kb_status->kb_mode  = STATE_EMI;
+		}else{
+			kb_device_led_setup( kb_led_cfg[KB_LED_POWER_ON] );
+			kb_status->kb_mode = STATE_SYNCING;
+			memset(&kb_event,0,sizeof(kb_event));  //clear the numlock key when power on
+		}
+	}
 }
 
 void  user_init(void)
 {
 	swire2usb_init();
 
-#if 0
 	kb_status.no_ack = 1;
-	//kb_keyScan_init();
-	kb_custom_init();
-	kb_batt_det_init();
+
+	kb_custom_init(&kb_status);
 	kb_info_load();
-	kb_rf_init();
 
 	int status = kb_status.host_keyboard_status | (kb_status.kb_mode == STATE_POWERON ? KB_NUMLOCK_STATUS_POWERON : 0);
 	kb_scan_key (status, 1);
 	kb_status.host_keyboard_status = KB_NUMLOCK_STATUS_INVALID;
 
-	kb_platform_init();
-	kb_pm_init();
-#endif
-
-
-#if ( MOUSE_NO_HW_SIM )
-    p_custom_cfg = (custom_cfg_t *) (DEVICE_ID_ADDRESS);
-#if MOUSE_GOLDEN_VPATTERN    
-    extern rf_packet_pairing_t   pkt_pairing;
-    pkt_pairing.did = p_custom_cfg->did;   //device-id init
-
-#if(MOUSE_PIPE1_DATA_WITH_DID)
-    extern rf_packet_mouse_t pkt_km;
-    pkt_km.did = p_custom_cfg->did;   //device-id init
-#endif
-
-    u16 vendor_id = p_custom_cfg->vid;
-    if(vendor_id != U16_MAX){
-        rf_set_access_code0 (rf_access_code_16to32(vendor_id));
-    }
-#endif
-#else
-    gpio_pullup_dpdm_internal( FLD_GPIO_DM_PULLUP | FLD_GPIO_DP_PULLUP );
-	kb_custom_init( &kb_status );
-#endif
-
-	device_info_load(&kb_status);
-#if ( !MOUSE_NO_HW_SIM )
-	platform_init(&kb_status);
-
-#if(MOUSE_WHEEL_WAKEUP_DEEP_EN )
-	cpu_set_gpio_wakeup(kb_status.hw_define->wheel[1], 0, 0);
-#endif
-
-    
     if ( kb_status.kb_mode == STATE_POWERON )
     	kb_device_led_setup(kb_led_cfg[KB_LED_POWER_ON]);
-#endif
+
+	kb_platform_init(&kb_status);
+	kb_pm_init();
     kb_rf_init();
     rf_set_power_level_index (kb_cust_tx_power_paring);
 
+    gpio_pullup_dpdm_internal( FLD_GPIO_DM_PULLUP | FLD_GPIO_DP_PULLUP );
 }
 
 _attribute_ram_code_ void irq_handler(void)
@@ -332,9 +314,26 @@ void main_loop(void)
 	}
 }
 #else
+
 void main_loop(void)
 {
-	return;
+    cpu_rc_tracking_en (RC_TRACKING_32K_ENABLE);
+	key_scaned = kb_scan_key (kb_status.host_keyboard_status | kb_is_lock_pressed, !km_dat_sending);
+
+	if(kb_status.kb_mode == STATE_EMI){
+		kb_emi_process();
+	}else{
+		if(kb_status.kb_mode <= STATE_PAIRING){
+			kb_paring_and_syncing_proc();
+		}
+
+		kb_rf_proc(key_scaned);
+		kb_device_led_process();
+		kb_batt_det_process(&kb_status);
+		kb_pm_proc();
+	}
+	cpu_rc_tracking_disable;
+	kb_status.loop_cnt++;
 
 }
 #endif

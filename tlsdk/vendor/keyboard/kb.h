@@ -31,6 +31,8 @@ typedef enum{
 
 
 void mouse_task_when_rf ( void );
+kb_status_t* kb_proc_get_kb_status(void);
+
 
 /* Disable C linkage for C++ Compilers: */
 #if defined(__cplusplus)

@@ -8,7 +8,7 @@
 #ifndef KB_CUSTOM_H_
 #define KB_CUSTOM_H_
 
-#include "../mouse/kb_default_config.h"
+#include "../keyboard/kb_default_config.h"
 
 typedef struct{
 	u16	pipe_pairing;			// pipe 0,pairig
@@ -20,20 +20,10 @@ typedef struct{
     u8  tx_power;
 	u8  tx_power_emi;
 
-	u16 gpio_lvd;  //0c
-	u16 gpio_scr;  //0e
-	u16 gpio_cap;  //10
-	u16 gpio_num;  //12
-
-	u8  level_lvd; //14
-	u8  level_scr;
-	u8  level_cap;
-	u8  level_num;
-
-	u8  crystal_type; //18
+	u8  crystal_type; //0c
 
 #if (CAVY_HAMSTER_REMINGTON_COMPATIBLE_EN)
-	u8  chn_type;	//19, 0xff: hamster chn, 0: cavy chn
+	u8  chn_type;	//0d, 0xff: hamster chn, 0: cavy chn
 #endif
 }kb_custom_cfg_t;
 

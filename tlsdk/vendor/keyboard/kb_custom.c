@@ -32,7 +32,7 @@ kb_custom_cfg_t *p_kb_custom_cfg;
 void kb_custom_init(kb_status_t *kb_status)
 {
 	//3f00  3f30  3f60
-	for(int i=0;i<3;i++){
+	for(int i=0;i<2;i++){
 		p_kb_custom_cfg = (kb_custom_cfg_t *) (DEVICE_ID_ADDRESS+(i*0x30));
 		if(p_kb_custom_cfg->cap != 0){
 			break;
@@ -55,17 +55,12 @@ void kb_custom_init(kb_status_t *kb_status)
 	kb_status->cust_tx_power = (p_kb_custom_cfg->tx_power == 0xff) ? RF_POWER_8dBm : p_kb_custom_cfg->tx_power;
 	kb_status->tx_power = RF_POWER_8dBm;
 
-	kb_status->led_gpio_lvd = (p_kb_custom_cfg->gpio_lvd == U16_MAX) ? 0 : p_kb_custom_cfg->gpio_lvd;
+	kb_status->led_gpio_lvd = GPIO_GP6;
+	kb_status->led_gpio_num = GPIO_SWS;
+	kb_status->vbat_channel = 0xFF;
 
-	kb_status->led_gpio_scr = (p_kb_custom_cfg->gpio_scr == U16_MAX) ? 0 : p_kb_custom_cfg->gpio_scr;
-	kb_status->led_gpio_cap = (p_kb_custom_cfg->gpio_cap == U16_MAX) ? 0 : p_kb_custom_cfg->gpio_cap;
-	kb_status->led_gpio_num = (p_kb_custom_cfg->gpio_num == U16_MAX) ? 0 : p_kb_custom_cfg->gpio_num;
-
-	kb_status->led_level_lvd = (p_kb_custom_cfg->level_lvd == U8_MAX) ? 1 : 0; //0xff:high_valid,level = 1
-
-	kb_status->led_level_scr = (p_kb_custom_cfg->level_scr == U8_MAX) ? 0 : 1; //0xff:high valid,level = 0
-	kb_status->led_level_cap = (p_kb_custom_cfg->level_cap == U8_MAX) ? 0 : 1; //0xff:high valid,level = 0
-	kb_status->led_level_num = (p_kb_custom_cfg->level_num == U8_MAX) ? 0 : 1; //0xff:high valid,level = 0
+	kb_status->led_level_lvd = 1; //0xff:high_valid,level = 1
+	kb_status->led_level_num = 0; //0xff:high valid,level = 0
 
 }
 

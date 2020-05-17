@@ -104,19 +104,17 @@ typedef struct {
 	u8  tx_retry;
     u8  host_keyboard_status;
 
-    u16 no_ack;
     u8 pre_host_status;
     u8 flag;
+    u16 no_ack;
 
 	u16 led_gpio_lvd;
-	u16 led_gpio_scr;
-	u16 led_gpio_cap;
 	u16 led_gpio_num;
 
 	u8  led_level_lvd;
-	u8  led_level_scr;
-	u8  led_level_cap;
 	u8  led_level_num;
+	u8  vbat_channel;
+	u8  rsvd;
 
 	u32 dongle_id;
     u32 loop_cnt;
@@ -195,6 +193,10 @@ typedef struct {
 
 #define MOUSE_PIPE1_DATA_WITH_DID	0
 
+
+#define  KB_DRIVE_PINS  {GPIO_GP2, GPIO_GP1, GPIO_GP3, GPIO_GP4, GPIO_GP10, GPIO_GP9}
+
+#define  KB_SCAN_PINS   {GPIO_GP8, GPIO_GP7, GPIO_GP0}
 
 ////////////////  ethernet /////////////////
 #define ETH_PHY_RST_GPIO			GPIO_GP0
