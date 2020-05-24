@@ -269,7 +269,7 @@ static inline void cpu_rc_tracking_en (int en) {
 void cpu_wakeup_init(void);
 void cpu_set_gpio_wakeup (int pin, int pol, int en);
 int cpu_sleep_wakeup (int deepsleep, int wakeup_src, u32 wakeup_tick);
-
+int cpu_sleep_wakeup_rc (int deepsleep, int wakeup_src, u32 wakeup_ms);
 
 extern const u16 wakeup_src_pin[];
 

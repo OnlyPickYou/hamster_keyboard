@@ -16,8 +16,10 @@
 #include "kb_led.h"
 #include "kb_rf.h"
 #include "kb_pm.h"
+#include "kb.h"
 
 extern u32	scan_pin_need;
+extern int device_sync;
 
 kb_slp_cfg_t kb_sleep = {
 	SLEEP_MODE_BASIC_SUSPEND,  //mode
@@ -81,16 +83,18 @@ void kb_pm_init(void)
 	kb_sleep.wakeup_tick = clock_time();
 }
 
+
 _attribute_ram_code_ void kb_pm_proc(void)
 {
 
-#if (0)
-#if(DEBUG_KB_NO_SUSPEND)
-    cpu_suspend_wakeup_sim (KB_MAIN_LOOP_TIME_MS*1000);
-#else
-	kb_sleep.device_busy = ( kb_status.rf_sending || KB_LED_BUSY || (kb_is_lock_pressed && scan_pin_need));
-	kb_sleep.quick_sleep = HOST_NO_LINK;
-	if ( kb_status.kb_mode <= STATE_PAIRING && kb_status.loop_cnt < KB_NO_QUICK_SLEEP_CNT){
+	extern u32  cpu_wakup_last_tick;
+    kb_status_t *kb_status = NULL;
+    kb_status = kb_proc_get_kb_status();
+
+
+	kb_sleep.device_busy = ( kb_status->rf_sending || KB_LED_BUSY );
+	kb_sleep.quick_sleep = (kb_status->no_ack > 400);
+	if ( kb_status->kb_mode <= STATE_PAIRING && kb_status->loop_cnt < KB_NO_QUICK_SLEEP_CNT){
 		kb_sleep.quick_sleep = 0;
 	}
 
@@ -98,16 +102,18 @@ _attribute_ram_code_ void kb_pm_proc(void)
 
 
 	kb_sleep.wakeup_src = PM_WAKEUP_TIMER;
-	kb_sleep.next_wakeup_tick = kb_sleep.wakeup_tick + 11400*16;
+	kb_sleep.wakeup_time = KB_SLEEP_BASIC_WAKEUP_TIME;
+
 	if ( kb_sleep.mode ==  SLEEP_MODE_LONG_SUSPEND){
     	kb_sleep.wakeup_src = PM_WAKEUP_TIMER | PM_WAKEUP_CORE;
-    	kb_sleep.next_wakeup_tick = kb_sleep.wakeup_tick + 100*CLOCK_SYS_CLOCK_1MS;
+    	kb_sleep.wakeup_time = KB_SLEEP_LONG_WAKUP_TIME;
+
 	}
 	else if ( kb_sleep.mode == SLEEP_MODE_DEEPSLEEP){
 		if(scan_pin_need){  //有按键按着  wait_deep状态，按键释放后进入deep
-			kb_status.kb_mode = STATE_WAIT_DEEP;
+			kb_status->kb_mode = STATE_WAIT_DEEP;
 			kb_sleep.mode = SLEEP_MODE_WAIT_DEEP;
-			kb_sleep.next_wakeup_tick = kb_sleep.wakeup_tick + 100*CLOCK_SYS_CLOCK_1MS;
+			kb_sleep.next_wakeup_tick = KB_SLEEP_LONG_WAKUP_TIME;
 		}
 		else{
 			kb_info_save();
@@ -115,11 +121,13 @@ _attribute_ram_code_ void kb_pm_proc(void)
 		}
 	}
 
-    while ( !clock_time_exceed (kb_sleep.wakeup_tick, 500) );
-    kb_cpu_sleep_wakeup (kb_sleep.mode == SLEEP_MODE_DEEPSLEEP, kb_sleep.wakeup_src, kb_sleep.next_wakeup_tick);
-	kb_sleep.wakeup_tick = clock_time();
-#endif
-#endif
+    while ( !clock_time_exceed (cpu_wakup_last_tick, 500) );
+
+	int wakeup_status = cpu_sleep_wakeup_rc (kb_sleep.mode == SLEEP_MODE_DEEPSLEEP, kb_sleep.wakeup_src, kb_sleep.wakeup_time);   // 8ms wakeup
+	if(!(wakeup_status & 2)){
+		device_sync = 0;	//ll_channel_alternate_mode ();
+	}
+
 }
 
 

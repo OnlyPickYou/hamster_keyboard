@@ -14,6 +14,10 @@
 #define SLEEP_MODE_WAIT_DEEP    		2
 #define SLEEP_MODE_DEEPSLEEP     		3
 
+
+#define KB_SLEEP_BASIC_WAKEUP_TIME      12
+#define KB_SLEEP_LONG_WAKUP_TIME        100
+
 typedef struct{
     u8   mode;
     u8   device_busy;
@@ -27,6 +31,7 @@ typedef struct{
 
     u32  wakeup_tick;
     u32  next_wakeup_tick;
+    u32  wakeup_time;
 } kb_slp_cfg_t;
 
 

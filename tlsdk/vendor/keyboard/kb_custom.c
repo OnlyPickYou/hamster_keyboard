@@ -57,7 +57,6 @@ void kb_custom_init(kb_status_t *kb_status)
 
 	kb_status->led_gpio_lvd = GPIO_GP6;
 	kb_status->led_gpio_num = GPIO_SWS;
-	kb_status->vbat_channel = 0xFF;
 
 	kb_status->led_level_lvd = 1; //0xff:high_valid,level = 1
 	kb_status->led_level_num = 0; //0xff:high valid,level = 0

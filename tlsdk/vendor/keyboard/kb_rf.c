@@ -280,7 +280,7 @@ void kb_rf_proc( u32 key_scaned )
 
 	kb_status.rf_sending = ((km_dat_sending || !kb_status.mode_link) && (kb_status.kb_mode != STATE_WAIT_DEEP));
 	if(kb_status.rf_sending){
-		if(HOST_LINK_LOST && kb_status.mode_link){
+		if((kb_status.no_ack > 300) && kb_status.mode_link){
 			kb_status.tx_retry = 5;
 		}
 		if(device_send_packet ( kb_rf_pkt, 550, kb_status.tx_retry, 0) ){

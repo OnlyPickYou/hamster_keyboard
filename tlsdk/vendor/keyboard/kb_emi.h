@@ -29,5 +29,5 @@ typedef struct{
 	u8	rsv[3];
 }kb_emi_info_t;
 
-extern void kb_emi_process(void);
+void kb_emi_process(void);
 #endif /* KB_EMI_H_ */

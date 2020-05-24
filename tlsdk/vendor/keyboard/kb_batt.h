@@ -11,6 +11,6 @@
 
 #define MOUSE_BATT_CHN_REAL_MASK     0x1f
 
-void kb_batt_det_process( kb_status_t *kb_status );
+void kb_batt_det_process(void);
 
 #endif /* KB_BATT_H_ */

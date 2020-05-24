@@ -14,12 +14,6 @@
 #define LINK_RCV_DONGLE_DATA  	0x02
 #define LINK_WITH_DONGLE_OK	    (LINK_PIPE_CODE_OK | LINK_RCV_DONGLE_DATA)
 
-
-//kb_status.loop_cnt relative
-#define KB_MANUAL_PARING_MOST	   (10000/KB_MAIN_LOOP_TIME_MS)  //手动配对最大时间
-#define KB_NO_QUICK_SLEEP_CNT	   (20000/KB_MAIN_LOOP_TIME_MS)  //LINK最大时间
-#define KB_PARING_POWER_ON_CNT      44    						 //上电自动配对包
-
 #define device_never_linked (rf_get_access_code1() == U32_MAX)
 
 extern u8* kb_rf_pkt;

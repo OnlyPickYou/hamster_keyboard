@@ -16,9 +16,9 @@
 #define DBG_BATT_LOW    0
 #endif
 
-void kb_batt_det_process( kb_status_t *kb_status )
+void kb_batt_det_process(void)
 {
-	u8 batt_chn = (kb_status->vbat_channel == 0xFF) ? COMP_ANA9 : kb_status->vbat_channel;    //COMP_GP5
+	u8 batt_chn = COMP_ANA9;    //COMP_GP5
 	u8 vbat_chn = MOUSE_BATT_CHN_REAL_MASK & batt_chn;
 	if ( DBG_BATT_LOW || battery_low_detect_auto(vbat_chn) ){
 		//battery low, led alarm

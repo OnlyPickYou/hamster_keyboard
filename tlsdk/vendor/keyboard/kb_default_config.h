@@ -18,11 +18,7 @@ extern "C" {
 #define STRING_PRODUCT			L"2.4G Wireless Audio"
 #define STRING_SERIAL			L"TLSR8266"
 
-#if		__PROJECT_KEYBOARD_8366__
 #define CHIP_TYPE				CHIP_TYPE_8366
-#else
-#define CHIP_TYPE				CHIP_TYPE_8266
-#endif
 
 #define APPLICATION_DONGLE		0			// or else APPLICATION_DEVICE
 #define	FLOW_NO_OS				1
@@ -69,7 +65,7 @@ extern "C" {
 #define CAVY_HAMSTER_REMINGTON_COMPATIBLE_EN			1
 
 #if (CAVY_HAMSTER_REMINGTON_COMPATIBLE_EN)
-	#define		CAVY_RF_CHANNEL_MAP_ENABLE				1
+	#define		CAVY_RF_CHANNEL_MAP_ENABLE				0
 #endif
 
 
@@ -120,7 +116,25 @@ typedef struct {
     u32 loop_cnt;
 } kb_status_t;
 
+typedef enum{
+	STATE_POWERON = 0,
+	STATE_SYNCING,
+	STATE_PAIRING ,
+	STATE_NORMAL,
+	STATE_SUSPEND,
+	STATE_DEEPSLEEP,
+	STATE_EMI,
+	STATE_WAIT_DEEP,
+}kb_mode_e;
+
+
 #define KB_MAIN_LOOP_TIME_MS    12
+
+//kb_status.loop_cnt relative
+#define KB_MANUAL_PARING_MOST	   (10000/KB_MAIN_LOOP_TIME_MS)  //手动配对最大时间
+#define KB_NO_QUICK_SLEEP_CNT	   (20000/KB_MAIN_LOOP_TIME_MS)  //LINK最大时间
+#define KB_PARING_POWER_ON_CNT      44    						 //上电自动配对包
+
 
 #define	DM_FUNC					AS_GPIO  //DM as LED
 #define	DP_FUNC					AS_GPIO  //DM and DP should be defined together
