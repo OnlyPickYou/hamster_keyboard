@@ -64,13 +64,9 @@ static inline void kb_set_key_invalid(kb_data_t *p)
 
 extern rf_kb_ctrl_t rf_kb_ctrl;
 
-#if(MCU_CORE_TYPE == MCU_CORE_8368 || MCU_CORE_TYPE == MCU_CORE_8266)
-extern u16 scan_pins[];
-extern u16 drive_pins[];
-#else
 extern u32 scan_pins[];
 extern u32 drive_pins[];
-#endif
+
 //int kb_is_data_same(kb_data_t *a, kb_data_t *b);
 //int kb_check_longpress(kb_longpress_ctrl_t *ctrl, int i, int *key_idx);
 //void kb_init(void);

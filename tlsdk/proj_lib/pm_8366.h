@@ -1,8 +1,6 @@
 
 #pragma once
 
-#if(MCU_CORE_TYPE == MCU_CORE_8366)
-
 
 static inline void usb_dp_pullup_en (int en)
 {
@@ -273,4 +271,3 @@ int cpu_sleep_wakeup_rc (int deepsleep, int wakeup_src, u32 wakeup_ms);
 
 extern const u16 wakeup_src_pin[];
 
-#endif

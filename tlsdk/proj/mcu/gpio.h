@@ -26,12 +26,13 @@ enum{
 
 #include "../common/static_assert.h"
 
-#if(MCU_CORE_TYPE == MCU_CORE_8266)
-#include "../mcu_spec/gpio_default_8266.h"
-#include "../mcu_spec/gpio_8266.h"
-#elif(MCU_CORE_TYPE == MCU_CORE_8366)
+
+#if(MCU_CORE_TYPE == MCU_CORE_8366 || 1)
 #include "../mcu_spec/gpio_default_8366.h"
 #include "../mcu_spec/gpio_8366.h"
+#elif(MCU_CORE_TYPE == MCU_CORE_8266)
+#include "../mcu_spec/gpio_default_8266.h"
+#include "../mcu_spec/gpio_8266.h"
 #elif(MCU_CORE_TYPE == MCU_CORE_8368)
 #include "../mcu_spec/gpio_default_8368.h"
 #include "../mcu_spec/gpio_8368.h"

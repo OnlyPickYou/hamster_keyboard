@@ -19,14 +19,8 @@ extern  kb_status_t kb_status;
 
 #if (defined(KB_DRIVE_PINS) && defined(KB_SCAN_PINS))
 
-
-#if(MCU_CORE_TYPE == MCU_CORE_8368 || MCU_CORE_TYPE == MCU_CORE_8266)
-u16 drive_pins[] = KB_DRIVE_PINS;	//8
-u16 scan_pins[] = KB_SCAN_PINS;		//18
-#else
-u32 drive_pins[] = KB_DRIVE_PINS;	//8
+u32 drive_pins[] = KB_DRIVE_PINS; //8
 u32 scan_pins[] = KB_SCAN_PINS;		//18
-#endif
 
 kb_data_t	kb_event;
 STATIC_ASSERT(IMPLIES((!KB_ONLY_SINGLEKEY_SUPP), KB_RETURN_KEY_MAX > 1));
