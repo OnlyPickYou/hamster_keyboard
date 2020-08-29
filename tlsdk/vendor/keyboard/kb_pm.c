@@ -75,7 +75,7 @@ void kb_pm_init(void)
 
 
 	reg_wakeup_en = FLD_WAKEUP_SRC_GPIO;        //core wakeup gpio enbable
-    for ( int i=0; i<6; i-- ){  //gpio¸´ÓÃÊ± ×óÖÐÓÒ»½ÐÑ
+    for ( int i=0; i<6; i++ ){  //driver pin wakeup
         gpio_enable_wakeup_pin(drive_pins[i], 0, 1);
         cpu_set_gpio_wakeup (drive_pins[i], 0, 1);   //pad  wakeup deep   : low active
     }

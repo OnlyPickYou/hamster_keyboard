@@ -616,8 +616,9 @@ _attribute_ram_code_ void irq_device_tx(void)
 }
 
 extern rf_packet_pairing_t	pkt_pairing;
+#if 0
 task_when_rf_func p_task_when_rf = NULL;
-
+#endif
 #ifndef SEND_PKT_IN_RAM
 #define SEND_PKT_IN_RAM 	1
 #endif
@@ -658,10 +659,12 @@ int	device_send_packet (u8 * p, u32 timeout, int retry, int pairing_link)
 		rf_send_packet (p, 300, step - 1);
 #endif
 		reg_rf_irq_status = 0xffff;
+#if 0
         if ( DO_TASK_WHEN_RF_EN && p_task_when_rf != NULL) {
            (*p_task_when_rf) ();
            p_task_when_rf = NULL;
         }
+#endif
 		while (	!device_ack_received &&
 				!clock_time_exceed (t, timeout*step) &&
 				//!(reg_rf_irq_status & (FLD_RF_IRX_RETRY_HIT | FLD_RF_IRX_RX_TIMEOUT | FLD_RF_IRX_CMD_DONE)) );

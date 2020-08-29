@@ -35,6 +35,5 @@ void irq_device_tx(void);
 #define DO_TASK_WHEN_RF_EN      1
 //typedef void (*callback_rx_func) (u8 *);
 //typedef void (*task_when_rf_func) (void);
-//extern task_when_rf_func p_task_when_rf;
 
 #endif /* KB_RF_H_ */

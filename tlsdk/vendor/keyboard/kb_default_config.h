@@ -10,13 +10,13 @@ extern "C" {
 //#define	__DEBUG_PRINT__			0
 //////////// product  Information  //////////////////////////////
 #define ID_VENDOR				0x248a			// for report
-#define ID_PRODUCT_BASE			0x8266
+#define ID_PRODUCT_BASE			0x8366
 // If ID_PRODUCT left undefined, it will default to be combination of ID_PRODUCT_BASE and the USB config USB_SPEAKER_ENABLE/USB_MIC_ENABLE...
 // #define ID_PRODUCT			0x8869
 
 #define STRING_VENDOR			L"Telink"
 #define STRING_PRODUCT			L"2.4G Wireless Audio"
-#define STRING_SERIAL			L"TLSR8266"
+#define STRING_SERIAL			L"TLSR8366"
 
 #define CHIP_TYPE				CHIP_TYPE_8366
 
@@ -80,7 +80,7 @@ extern "C" {
 #define CLOCK_SYS_CLOCK_HZ  	16000000
 #endif
 /////////////////// watchdog  //////////////////////////////
-#define MODULE_WATCHDOG_ENABLE	1
+#define MODULE_WATCHDOG_ENABLE	0
 
 ///////////////////  interrupt  //////////////////////////////
 
@@ -136,8 +136,8 @@ typedef enum{
 #define KB_PARING_POWER_ON_CNT      44    						 //上电自动配对包
 
 
-#define	DM_FUNC					AS_GPIO  //DM as LED
-#define	DP_FUNC					AS_GPIO  //DM and DP should be defined together
+//#define	DM_FUNC					AS_GPIO  //DM as LED
+//#define	DP_FUNC					AS_GPIO  //DM and DP should be defined together
 #define	DP_OUTPUT_ENABLE		0
 #define	DP_INPUT_ENABLE			1
 #define	DP_DATA_OUT				1
